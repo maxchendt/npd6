@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>NPD6 by npd6</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>NPD6</h1>
+        <p>Neighbor Proxy Daemon IPv6</p>
+
+        <p class="view"><a href="https://github.com/npd6/npd6">View the Project on GitHub <small>npd6/npd6</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/npd6/npd6/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/npd6/npd6/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/npd6/npd6">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><em>Having just migrated this project from GoogleCode, for the moment this is just the original project title page from that...</em></p>
+
+<h2>
+<a name="npd6---neighbor-proxy-daemon-ipv6" class="anchor" href="#npd6---neighbor-proxy-daemon-ipv6"><span class="octicon octicon-link"></span></a>npd6 - Neighbor Proxy Daemon IPv6</h2>
+
+<p>A Linux daemon to provide a proxy service for IPv6 Neighbor Solicitations received by a gateway routing device.</p>
+
+<h2>
+<a name="summary" class="anchor" href="#summary"><span class="octicon octicon-link"></span></a>Summary</h2>
+
+<p>This Linux daemon will permit a device to respond to IPv6 Neighbor Solicitations based upon a configured address prefix, irrespective of whether or not those addresses are directly know or not.</p>
+
+<h2>
+<a name="linux-ipv6" class="anchor" href="#linux-ipv6"><span class="octicon octicon-link"></span></a>Linux IPv6</h2>
+
+<p>There's agap in Linux's IPv6 support. For a Linux device acting as a router (as a gateway does by definition) before it will respond to Neighbor Solicitations for inside-devices, they must be <em>statically</em> configured into the box. </p>
+
+<ul>
+<li>Typically, IPv6 addresses will be allocated by devices in an entirely non-static way. So knowing what addresses are in use in your private net is a non-trivial task to start with.</li>
+<li>Configuring them in is fiddly, and a maintenance nightmare.</li>
+<li>It doesn't scale. If you had a couple of IPv6 devices in the home-net, well maybe. But what happens when you have a few dozen? And their addresses change? And you have guest devices appearing and disappearing? </li>
+<li>Linux support is still primitive, even for a static config. For example, you can configure IPv6 addresses for which we must act as a Neighbor Proxy, but, currently, you cannot <em>inspect</em> them to check. (No one believes this when they first hear it...)</li>
+</ul><h2>
+<a name="solution" class="anchor" href="#solution"><span class="octicon octicon-link"></span></a>Solution</h2>
+
+<p>What such a situation needs is, at its simplest, the gateway device to act as a simple proxy, answering Neighbor Solicitations for (potentially) <em>any</em> address with the assigned 64-bit prefix. In the simplest form I want my gateway, if it receives a Neighbor Solicitation for <em>any</em> address that starts with the prefix, to reply with a Neighbor Advertisement, irrespective of whether or not that device <em>actually</em> exists on my net: let the traffic arrive and have normal routing mechanisms decide if they can actually forward it.</p>
+
+<p>And thus npd6 was born. There's more to it, of course, than that simple description. But, in essence, that's what npd6 does - answer Neighbor Solicitations for (potentially) <em>any</em> address with a defined prefix with a Neighbor Advertisement.</p>
+
+<h2>
+<a name="key-features" class="anchor" href="#key-features"><span class="octicon octicon-link"></span></a>Key features</h2>
+
+<p>At the time of writing, npd6 is in a fairly advanced, usable state. Key aspects and features include:</p>
+
+<ul>
+<li>Extensive optional debug output.</li>
+<li>Very low usage of CPU and memory.</li>
+<li>Logging to a file, or stdout/stderr or via syslog.</li>
+<li>Ability to log a record of targets received.</li>
+<li>Config via a text file.</li>
+<li>Blacklisting or whitelisting if required.</li>
+<li>Black/whitelisting based on static addresses or pattern matching.</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/npd6">npd6</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-293662-6");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
