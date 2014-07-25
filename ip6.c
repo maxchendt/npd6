@@ -25,7 +25,7 @@
 #include "includes.h"
 #include "npd6.h"
 
-#include "expintf.h"
+#include "exparse/expintf.h"
 
 /*****************************************************************************
  * processNS
