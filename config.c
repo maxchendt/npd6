@@ -18,10 +18,6 @@
 *   along with npd6.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* $Id$
-* $HeadURL$
-*/
-
 #include "includes.h"
 #include "npd6.h"
 #include "npd6config.h"
@@ -37,7 +33,8 @@ int readConfig(char *configFileName)
     const char delimiters[] = "=";
     char *lefttoken, *righttoken;
     char *cp;
-    unsigned int    prefixCount=0; // Temp count of prefixes, to match interfaces
+    // prefixCount is now global
+    //unsigned int    prefixCount=0; // Temp count of prefixes, to match interfaces
     // Used if building white/blacklist
     struct  in6_addr    listEntry;
     unsigned int check;
@@ -47,8 +44,8 @@ int readConfig(char *configFileName)
     int             prefixaddrlen, masklen=0;
     char            interfacestr[INTERFACE_STRLEN];
     char            *slashMarker;
-    int             approxInterfaces = 0;
-
+    int             cInterfaces = 0;
+    int             cPrefixes = 0;
     
     // Ensure global set correctly
     interfaceCount = 0;
@@ -65,25 +62,39 @@ int readConfig(char *configFileName)
     // There will almost always be a few extra instances of this string in the file 
     // and hence this value will typically be slightly bigger than required.
     // However the amount of memory so "wasted" is pretty tiny, so I really don't care.
+    // Extended to also do same for "prefix" as well (since split ofo structures)
     do {
         if (fgets(linein, 128, configFileFD) == NULL)
             break;
         
         // Quick check for the presence of the string "interface"
         if ( strstr( linein, configStrs[NPD6INTERFACE]) )
-            approxInterfaces++;
+            cInterfaces++;
+        // Or "prefix"
+        if ( strstr( linein, configStrs[NPD6PREFIX]) )
+            cPrefixes++;
     } while (1);
     flog(LOG_DEBUG2, "Sizing master interface data structure for %d interfaces.",
-         approxInterfaces);
+         cInterfaces);
+    flog(LOG_DEBUG2, "Sizing master prefix data structure for %d prefixes.",
+         cPrefixes);
     
-    interfaces = calloc( approxInterfaces, sizeof(struct npd6Interface) );
+    interfaces = calloc( cInterfaces, sizeof(struct npd6Interface) );
     if (interfaces == NULL ) {
-        flog(LOG_ERR, "calloc failed - Terminating");
+        flog(LOG_ERR, "interfaces calloc failed - Terminating");
+        return (-1);
+    }
+    
+    prefixes = calloc( cPrefixes, sizeof(struct npd6Prefix) );
+    if (interfaces == NULL ) {
+        flog(LOG_ERR, "prefixes calloc failed - Terminating");
         return (-1);
     }
     
     flog(LOG_DEBUG2, "calloced %d bytes for the master interfaces data-structure", 
-            approxInterfaces * sizeof( struct npd6Interface)   );
+            cInterfaces * sizeof( struct npd6Interface)   );
+    flog(LOG_DEBUG2, "calloced %d bytes for the master prefix data-structure", 
+            cPrefixes * sizeof( struct npd6Prefix)   );
     
     // Go back to the start of the file 
     rewind(configFileFD);
@@ -180,10 +191,10 @@ int readConfig(char *configFileName)
                     // Build a binary image of it
                     build_addr(prefixaddrstr, &prefixaddr);
                     // Store it
-                    interfaces[prefixCount].prefix = prefixaddr;
-                    strncpy( interfaces[prefixCount].prefixStr, prefixaddrstr, 
-                             sizeof(interfaces[prefixCount].prefixStr) );
-                    interfaces[prefixCount].prefixLen = masklen;
+                    prefixes[prefixCount].prefix = prefixaddr;
+                    strncpy( prefixes[prefixCount].prefixStr, prefixaddrstr, 
+                             sizeof(prefixes[prefixCount].prefixStr) );
+                    prefixes[prefixCount].prefixLen = masklen;
                     prefixCount++;
                     break;
 
@@ -386,13 +397,14 @@ int readConfig(char *configFileName)
             }
     } while (len);
 
-    // Basic check: did we have the same number of interfaces as prefixes?
-    if ( interfaceCount != prefixCount )
-    {
-        flog(LOG_ERR, "Must have same number of prefixes as interfaces. Interfaces = %d, Prefixes = %d",
-            interfaceCount, prefixCount);
-        return 1;
-    }
+//     // Basic check: did we have the same number of interfaces as prefixes?
+//     if ( interfaceCount != prefixCount )
+//     {
+//         flog(LOG_ERR, "Must have same number of prefixes as interfaces. Interfaces = %d, Prefixes = %d",
+//             interfaceCount, prefixCount);
+//         return 1;
+//     }
+    
     // Did we have ANY interfaces?
     if ( interfaceCount < 1)
     {
@@ -400,7 +412,7 @@ int readConfig(char *configFileName)
         return 1;
     }
 
-    flog(LOG_DEBUG, "Total interfaces defined: %d", interfaceCount);
+    flog(LOG_INFO, "Total interfaces defined: %d", interfaceCount);
 
     // Work out the interface indices and link addrs
     for (check = 0; check < interfaceCount; check ++)
@@ -421,7 +433,7 @@ int readConfig(char *configFileName)
                     interfaces[check].index);
         
         // Interface's link address
-        if (getLinkaddress( interfaces[check].nameStr, interfaces[check].linkAddr) )
+        if (getLinkaddress( interfaces[check].nameStr, prefixes[check].linkAddr) )
         {
             flog(LOG_ERR, "Failed to match interface %s to a link-level address.", 
                  interfaces[check].nameStr );

@@ -70,9 +70,9 @@ void processNS( int ifIndex,
     (struct nd_neighbor_solicit *)(msg + ETH_HLEN + sizeof( struct ip6_hdr));
     
     // For the interfaceIdx
-    struct  in6_addr            prefixaddr = interfaces[ifIndex].prefix;
-    int                         prefixaddrlen = interfaces[ifIndex].prefixLen;
-    unsigned char               *linkAddr = interfaces[ifIndex].linkAddr;
+    struct  in6_addr            prefixaddr = prefixes[ifIndex].prefix;
+    int                         prefixaddrlen = prefixes[ifIndex].prefixLen;
+    unsigned char               *linkAddr = prefixes[ifIndex].linkAddr;
     int                         interfaceIdx = interfaces[ifIndex].index;
     
     // Extracted from the received packet
@@ -295,7 +295,7 @@ void processNS( int ifIndex,
         
         flog(LOG_DEBUG2, "Outbound message built");
         
-        err = sendmsg( interfaces[ifIndex].icmpSock, &mhdr, 0);
+        err = sendmsg( sockIcmp, &mhdr, 0);
         if (err < 0)
             flog(LOG_ERR, "sendmsg returned with error %d = %s", errno, strerror(errno));
         else

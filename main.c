@@ -73,8 +73,9 @@ int main(int argc, char *argv[])
     listLog=0;
     ralog=0;
     
-    /* Interface info */
+    /* Global interface and prefix counts */
     interfaceCount = 0;
+    prefixCount = 0;
     
     /* Parse the args */
     while ((c = getopt_long(argc, argv, OPTIONS_STR, prog_opt, NULL)) > 0)
@@ -174,7 +175,7 @@ int main(int argc, char *argv[])
 
 void dispatcher(void)
 {
-    struct pollfd   *fds;
+    struct pollfd   fds[3];
     unsigned int    msglen;
     unsigned char   msgdata[MAX_MSG_SIZE * 2];
     int             rc;
@@ -182,59 +183,57 @@ void dispatcher(void)
     int             consecutivePollErrors = 0;
     
     // Each interface has 2 sockets, so we need to allocate for that + 1
-    fds = (struct pollfd *)calloc( (interfaceCount*2)+1, sizeof(struct pollfd) );
-    flog(LOG_DEBUG2, "Dynamically allocated %d bytes to the master FD array", 
-         (interfaceCount+1) * sizeof(struct pollfd) );
+//     fds = (struct pollfd *)calloc( (interfaceCount*2)+1, sizeof(struct pollfd) );
+//     flog(LOG_DEBUG2, "Dynamically allocated %d bytes to the master FD array", 
+//          (interfaceCount+1) * sizeof(struct pollfd) );
     
     // In the fds set, the first N positions are for the v6 sockets, the second N
     // are for the icmpv6 sockets.
-    for(fdIdx=0; fdIdx < interfaceCount; fdIdx++)
-    {
+//     for(fdIdx=0; fdIdx < interfaceCount; fdIdx++)
+//     {
         // Packet socket
-        fds[fdIdx].fd = interfaces[fdIdx].pktSock;
-        flog(LOG_DEBUG2, "pktSock value is: %d", fds[fdIdx].fd );
-        fds[fdIdx].events = POLLIN;
-        fds[fdIdx].revents = 0;
+        fds[0].fd = sockPkt;
+        fds[0].events = POLLIN;
+        fds[0].revents = 0;
         
         // ICMP socket
         // We only bother with this as we get inbound junk on this socket 
         // (including RAs which we might actually care about now cf. bug 60)
-        fds[fdIdx+interfaceCount].fd = interfaces[fdIdx].icmpSock;
-        fds[fdIdx+interfaceCount].events = POLLIN;
-        fds[fdIdx+interfaceCount].revents = 0;
-    }
+        fds[1].fd = sockIcmp;
+        fds[1].events = POLLIN;
+        fds[1].revents = 0;
+//     }
     
     // Tail it
-    fds[interfaceCount*2].fd = -1;
-    fds[interfaceCount*2].events = 0;
-    fds[interfaceCount*2].revents = 0;
+    fds[2].fd = -1;
+    fds[2].events = 0;
+    fds[2].revents = 0;
     
     for (;;)
     {
-        rc = poll(fds, interfaceCount+1, DISPATCH_TIMEOUT);
-        //flog(LOG_DEBUG2, "Came off poll with rc = %d", rc);
+        rc = poll(fds, 2, DISPATCH_TIMEOUT);
         
         if (rc > 0)
         {
             // Most likely event is a valid data item received.
-            for (fdIdx=0; fdIdx < (interfaceCount*2); fdIdx++)
+            for (fdIdx=0; fdIdx < 2; fdIdx++)
             {
                 if (fds[fdIdx].revents & POLLIN)
                 {
                     // Was it a packet socket?
-                    if(fdIdx < interfaceCount) {
+                    if(fdIdx == 0) {
                         consecutivePollErrors = 0;	// reset it
-                        msglen = get_rx(interfaces[fdIdx].pktSock, msgdata);
+                        msglen = get_rx(sockPkt, msgdata);
                         // msglen is checked for sanity already within get_rx()
                         flog(LOG_DEBUG2, "For packet socket, get_rx() gave msg with len = %d", msglen);
                         processNS(fdIdx, msgdata, msglen);
                         continue;
                     }
                     // Or was it an ICMP socket?
-                    if(fdIdx >= interfaceCount) {
+                    if(fdIdx == 1) {
                         struct in6_addr icmp6Addr;
                         consecutivePollErrors = 0;	// reset it
-                        msglen = get_rx_icmp6(interfaces[fdIdx/2].icmpSock, msgdata, &icmp6Addr);
+                        msglen = get_rx_icmp6(sockIcmp, msgdata, &icmp6Addr);
                         flog(LOG_DEBUG2, "For ICMP6 socket, get_rx_icmp6() gave msg with len = %d", msglen);
                         // We do nothing at all with the received data!
                         // Or maybe we do.... Ref. bug/NFR 60: process them
@@ -253,16 +252,16 @@ void dispatcher(void)
                 {
                     flog(LOG_WARNING, "Major socket error on fds %d", fdIdx);
                     // Try and recover... long shot
-                    close(interfaces[fdIdx].pktSock);
+                    close(sockPkt);
                     sleep(1);
-                    interfaces[fdIdx].pktSock = open_packet_socket(interfaces[fdIdx].index);
-                    if ( interfaces[fdIdx].pktSock < 0)
+                    sockPkt = open_packet_socket();
+                    if ( sockPkt < 0)
                     {
                         // Drop dead. We're stuffed.
                         flog(LOG_ERR, "dispatcher(): failed to reinit stuck socket. Dead.");
                         exit(1);
                     }
-                    fds[fdIdx].fd = interfaces[fdIdx].pktSock;
+                    fds[fdIdx].fd = sockPkt;
                     fds[fdIdx].events = POLLIN;
                     fds[fdIdx].revents = 0;
                     

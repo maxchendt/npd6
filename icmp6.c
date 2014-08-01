@@ -42,7 +42,7 @@
  *      int sock on success, otherwise -1
  *
  */
-int open_packet_socket(int ifIndex)
+int open_packet_socket(void)
 {
     int sock, err;
     struct sock_fprog fprog;
@@ -73,17 +73,17 @@ int open_packet_socket(int ifIndex)
     memset(&lladdr, 0, sizeof(lladdr));
     lladdr.sll_family = PF_PACKET;
     lladdr.sll_protocol = htons(ETH_P_IPV6);
-    lladdr.sll_ifindex = ifIndex;
+    lladdr.sll_ifindex = 0;    
     lladdr.sll_hatype = 0;
     lladdr.sll_pkttype = 0;
     lladdr.sll_halen = ETH_ALEN;
     err=bind(sock, (struct sockaddr *)&lladdr, sizeof(lladdr));
     if (err < 0)
     {
-        flog(LOG_ERR, "packet socket bind to interface %d failed: %s", ifIndex, strerror(errno));
+        flog(LOG_ERR, "packet socket bind failed: %s", strerror(errno));
         return (-1);
     }
-    flog(LOG_DEBUG2, "packet socket bind to interface %d OK", ifIndex);
+    flog(LOG_DEBUG2, "packet socket bind OK");
 
     // Tie the BSD-PF filter to the socket
     err = setsockopt(sock, SOL_SOCKET, SO_ATTACH_FILTER, &fprog, sizeof(fprog));
@@ -405,31 +405,31 @@ sinfulexit:
 int init_sockets(void)
 {
     int errcount = 0;
-    int loop, sock, sockicmp;
+    int loop, sock;
 
     /* Raw socket for receiving NSs */
     for (loop=0; loop < interfaceCount; loop++)
     {
-        sock = open_packet_socket(interfaces[loop].index);
+        sock = open_packet_socket();
   
         if (sock < 0)
         {
             flog(LOG_ERR, "open_packet_socket: failed on iteration %d", loop);
             errcount++;
         }
-        interfaces[loop].pktSock = sock;
+        sockPkt = sock;
         flog(LOG_DEBUG, "open_packet_socket: %d OK.", loop);
         flog(LOG_DEBUG2, "open_packet_socket value = %d", sock);
     
         /* ICMPv6 socket for sending NAs */
-        sockicmp = open_icmpv6_socket();
-        if (sockicmp < 0)
+        sock = open_icmpv6_socket();
+        if (sock < 0)
         {
             flog(LOG_ERR, "open_icmpv6_socket: failed.");
             errcount++;
         }
         flog(LOG_DEBUG, "open_icmpv6_socket: OK.");
-        interfaces[loop].icmpSock = sockicmp;
+        sockIcmp = sock;
     }
     
     return errcount;

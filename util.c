@@ -499,8 +499,8 @@ void dropdead(void)
     for (loop=0; loop<interfaceCount; loop++)
     {
         if_allmulti(interfaces[loop].nameStr, interfaces[loop].multiStatus);
-        close( interfaces[loop].pktSock );
-        close( interfaces[loop].icmpSock );
+        close( sockPkt );
+        close( sockIcmp );
     }
 
     flog(LOG_ERR, "Tidied up and now exiting. Goodbye.");

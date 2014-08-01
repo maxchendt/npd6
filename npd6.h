@@ -67,7 +67,8 @@
 //
 char            *pname;
 char            *paramName;
-int             sockpkt;
+int             sockPkt;
+int             sockIcmp;
 int             debug;
 int             daemonize;
 FILE            *logFileFD;
@@ -80,17 +81,20 @@ int             initialIFFlags;
 struct npd6Interface {
     char            nameStr[INTERFACE_STRLEN];
     unsigned int    index;
+    unsigned int    multiStatus;
+};
+struct npd6Prefix {
     char            prefixStr[INET6_ADDRSTRLEN];
     struct in6_addr prefix;
     int             prefixLen;
     unsigned char   linkAddr[6];
-    unsigned int    multiStatus;
-    int             pktSock;
-    int             icmpSock;
 };
-unsigned int    interfaceCount;         // Total number of interface/prefix combos
-// We dynaimcally size this at run-time
-struct  npd6Interface *interfaces;
+unsigned int    interfaceCount;         // Total number of interface patterns
+unsigned int    prefixCount;            // Total number of prefixes
+
+// We dynamcally size this at run-time
+struct  npd6Interface   *interfaces;
+struct  npd6Prefix      *prefixes;
 
 // Key behaviour
 int             naLinkOptFlag;      // From config file NPD6OPTFLAG
@@ -151,7 +155,7 @@ void    storeListEntry(struct in6_addr *);
 
 
 // icmp6.c
-int     open_packet_socket(int);
+int     open_packet_socket(void);
 int     open_icmpv6_socket(void);
 int     get_rx(int, unsigned char *);
 int     get_rx_icmp6(int, unsigned char *, struct in6_addr *);
