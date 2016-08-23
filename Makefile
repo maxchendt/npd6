@@ -71,11 +71,11 @@ install: all
 ubuntu: all
 	mkdir $(DEBIAN)/DEBIAN/
 	cp $(DEBIAN)/c* $(DEBIAN)/DEBIAN/
-	mkdir -p $(DEBIAN)/etc/init.d/
+	mkdir -p $(DEBIAN)/etc/npd/
 	mkdir -p $(DEBIAN)$(INSTALL_PREFIX)/bin/
 	mkdir -p $(DEBIAN)$(MAN_PREFIX)/man5/
 	mkdir -p $(DEBIAN)$(MAN_PREFIX)/man8/
-	cp etc/npd6 $(DEBIAN)/etc/init.d/npd6
+	cp etc/npd6 $(DEBIAN)/etc/npd/npd6
 	cp etc/npd6.conf.sample $(DEBIAN)/etc/npd6.conf.sample
 	cp npd6 $(DEBIAN)$(INSTALL_PREFIX)/bin/
 	cp man/npd6.conf.5.gz $(DEBIAN)$(MAN_PREFIX)/man5/
@@ -86,11 +86,11 @@ ubuntu: all
 debian: all
 	mkdir $(DEBIAN)/DEBIAN/
 	cp $(DEBIAN)/c* $(DEBIAN)/DEBIAN/
-	mkdir -p $(DEBIAN)/etc/init.d/
+	mkdir -p $(DEBIAN)/etc/npd/
 	mkdir -p $(DEBIAN)$(INSTALL_PREFIX)/bin/
 	mkdir -p $(DEBIAN)$(MAN_PREFIX)/man5/
 	mkdir -p $(DEBIAN)$(MAN_PREFIX)/man8/
-	cp etc/npd6 $(DEBIAN)/etc/init.d/npd6
+	cp etc/npd6 $(DEBIAN)/etc/npd/npd6
 	cp etc/npd6.conf.sample $(DEBIAN)/etc/npd6.conf.sample
 	cp npd6 $(DEBIAN)$(INSTALL_PREFIX)/bin/
 	cp man/npd6.conf.5.gz $(DEBIAN)$(MAN_PREFIX)/man5/
