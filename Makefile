@@ -61,6 +61,6 @@ distclean:
 	rm -rf debian/DEBIAN/
 	rm -rf debian/npd6/
 	rm -rf debian/files
-	rm -rf debian/npd6.*
+#	rm -rf debian/npd6.*
 	rm -f npd6*.deb
 
