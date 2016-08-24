@@ -13,3 +13,5 @@ building deb package
     dpkg-buildpackage -b -us -uc -i
     cd ..
     sudo dpkg -i npd6_1.1.1_amd64.deb 
+
+Or download from https://github.com/maxchendt/npd6/releases/download/1.1.1/npd6\_1.1.1_amd64.deb
