@@ -36,7 +36,7 @@ SOURCES=src/main.c \
 	
 OBJECTS=$(SOURCES:.c=.o)
 HEADERS=includes.h npd6.h
-EXECUTABLE=npd6
+EXECUTABLE=src/npd6
 INSTALL_PREFIX=/usr
 MAN_PREFIX=/usr/share/man
 DEBIAN=debian/
@@ -62,5 +62,7 @@ distclean:
 	rm -rf debian/npd6/
 	rm -rf debian/files
 #	rm -rf debian/npd6.*
+	rm -rf debian/*debhelper*
+	rm -rf debian/npd6.substvars
 	rm -f npd6*.deb
 
