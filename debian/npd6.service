@@ -1,0 +1,12 @@
+[Unit]
+Description=IPv6 neighbor proxy daemon
+Documentation=man:npd6(8)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/npd6
+
+[Install]
+WantedBy=multi-user.target
