@@ -56,9 +56,9 @@ clean:
 
 distclean:
 	rm -rf $(OBJECTS) $(EXECUTABLE)
-	rm -rf debian/etc/
-	rm -rf debian/usr/
-	rm -rf debian/DEBIAN/
+#	rm -rf debian/etc/
+#	rm -rf debian/usr/
+#	rm -rf debian/DEBIAN/
 	rm -rf debian/npd6/
 	rm -rf debian/files
 #	rm -rf debian/npd6.*
