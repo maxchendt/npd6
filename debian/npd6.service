@@ -4,7 +4,7 @@ Documentation=man:npd6(8)
 After=network.target
 
 [Service]
-Type=simple
+Type=forking
 User=root
 ExecStart=/usr/bin/npd6
 
