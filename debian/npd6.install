@@ -1,4 +1,4 @@
 usr/bin/
 usr/share/man/
-etc/npd6.conf.sample /etc/npd/
+etc/npd6.conf.sample /etc/npd6/
 debian/npd6.service lib/systemd/system
