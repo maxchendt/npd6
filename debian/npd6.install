@@ -1,0 +1,4 @@
+usr/bin/
+usr/share/man/
+etc/npd* /etc/npd/
+debian/npd6.service lib/systemd/system
