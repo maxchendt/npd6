@@ -1,3 +1,10 @@
+npd6 (1.1.1) stable; urgency=medium
+
+  * add debian/, add support for systemd
+
+ -- CHEN Deng-Ta <no@no.org>  Wed, 24 Aug 2016 10:53:08 +0800
+
+
 npd6 (1.1.0) trusty; urgency=medium
 
   * Consolidation into 1.1.0
